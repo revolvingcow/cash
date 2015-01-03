@@ -1,0 +1,10 @@
+2015-01-03  @general    Some other stuff
+    #cash       -10.00
+    #services   +10.00
+2015-01-03  @general    Multiple accounts example
+    #cash       +10.00
+    #liability  -5.00
+    #a          -5.00
+2015-01-03  @something
+    #cash       +2.00
+@pending

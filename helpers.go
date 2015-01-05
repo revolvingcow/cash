@@ -42,13 +42,11 @@ func hasPendingTransaction(pendingFile string) bool {
 
 // Parse a given string to extract an account name
 func parseAccount(fields []string) (string, error) {
-	for i := 0; i < len(fields); i++ {
-		if strings.HasPrefix(fields[i], "#") {
-			return fields[i], nil
-		}
+	if len(fields) > 0 {
+		return strings.Join(fields, " "), nil
 	}
 
-	return fields[0], nil
+	return "", errors.New("No account information found")
 }
 
 // Parse the given string to extract a proper date
@@ -79,16 +77,12 @@ func parseDate(in string) (time.Time, error) {
 }
 
 // Parse the value from the arguments
+func parseAmount(text string) (*big.Rat, error) {
+	amount := new(big.Rat)
 
-func parseValue(fields []string, account string) (*big.Rat, error) {
-	r := new(big.Rat)
-
-	for i := 0; i < len(fields); i++ {
-		if fields[i] != account {
-			r.SetString(fields[i])
-			return r, nil
-		}
+	if r, _ := amount.SetString(text); r != nil {
+		return amount, nil
 	}
 
-	return r, errors.New("No value found")
+	return nil, errors.New("No value found")
 }

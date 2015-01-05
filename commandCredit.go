@@ -28,9 +28,10 @@ func actionCredit(c *cli.Context) {
 	ensureFileExists(pendingFile)
 
 	args := c.Args()
-	name, err := parseAccount(args)
+	li := len(args) - 1
+	name, err := parseAccount(args[:li])
 	check(err)
-	amount, err := parseValue(args, name)
+	amount, err := parseAmount(args[li])
 	check(err)
 
 	a := Account{

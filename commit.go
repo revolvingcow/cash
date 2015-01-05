@@ -2,9 +2,7 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
-	"math/big"
 	"os"
 	"strings"
 	"time"
@@ -35,7 +33,7 @@ func actionCommit(c *cli.Context) {
 	project := parseProject(args)
 	description := parseDescription(args, project)
 
-	writeTransaction(date.Format("2006-01-02"), project, description)
+	writeTransaction(date, project, description)
 }
 
 // Parse the given string to extract a proper date
@@ -91,91 +89,8 @@ func parseDescription(fields []string, project string) string {
 	return strings.Replace(strings.Join(fields, " "), "  ", " ", -1)
 }
 
-type Account struct {
-	Name   string
-	Debit  bool
-	Amount *big.Rat
-}
-
-type Transaction struct {
-	Date        time.Time
-	Project     string
-	Description string
-	Accounts    []Account
-}
-
-func (t *Transaction) FromString(text string) error {
-	// Parse the lines of text
-	lines := strings.Split(text, "\n")
-	for i, line := range lines {
-		fields := strings.Split(line, "\t")
-
-		switch i {
-		case 0:
-			date, err := parseDate(fields[0])
-			check(err)
-			project := fields[1]
-			description := ""
-			if len(fields) > 2 {
-				description = strings.Join(fields[2:], " ")
-			}
-
-			t = &Transaction{
-				Date:        date,
-				Project:     project,
-				Description: description,
-				Accounts:    []Account{},
-			}
-			break
-
-		default:
-			if len(fields) != 3 {
-				break
-			}
-
-			account := fields[1]
-			debit := true
-
-			if strings.HasPrefix(fields[2], "-") {
-				debit = false
-			}
-			value := new(big.Rat)
-			value.SetString(fields[2][1:])
-
-			t.Accounts = append(
-				t.Accounts,
-				Account{
-					Name:   account,
-					Debit:  debit,
-					Amount: value,
-				})
-
-			break
-		}
-	}
-
-	if len(t.Accounts) == 0 {
-		return errors.New("Transaction does not have any accounts")
-	}
-
-	// Check that they balance
-	balance := new(big.Rat)
-	for _, a := range t.Accounts {
-		if a.Debit {
-			balance.Add(balance, a.Amount)
-		} else {
-			balance.Sub(balance, a.Amount)
-		}
-	}
-	if balance.FloatString(2) != "0.00" {
-		return errors.New("Transaction does not balance")
-	}
-
-	return nil
-}
-
 // Write a transaction line where there is a pending transaction
-func writeTransaction(date, project, description string) {
+func writeTransaction(date time.Time, project, description string) {
 	if !hasPendingTransaction() {
 		check(errors.New("No pending transaction to write"))
 	}
@@ -183,15 +98,28 @@ func writeTransaction(date, project, description string) {
 	pending, err := ioutil.ReadFile(PendingFile)
 	check(err)
 
-	// Find the line containing @pending and replace it with our transaction
-	s := fmt.Sprintf("%s\t%s\t%s\n%s\n", date, project, description, string(pending))
-	var t Transaction
-	err = t.FromString(s)
+	t := Transaction{
+		Date:        date,
+		Project:     project,
+		Description: description,
+		Accounts:    []Account{},
+	}
+
+	lines := strings.Split(strings.TrimRight(string(pending), "\n"), "\n")
+	for _, line := range lines {
+		var a Account
+		err = a.FromString(line)
+		check(err)
+
+		t.Accounts = append(t.Accounts, a)
+	}
+
+	err = t.CheckBalance()
 	check(err)
 
-	file, err := os.OpenFile(Ledger, os.O_APPEND|os.O_WRONLY, 0666)
+	file, err := os.OpenFile(LedgerFile, os.O_APPEND|os.O_WRONLY, 0666)
 	check(err)
 	defer file.Close()
-	_, err = file.WriteString(s)
+	_, err = file.WriteString(t.ToString())
 	check(err)
 }

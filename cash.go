@@ -15,14 +15,18 @@ const (
 )
 
 var (
-	Ledger            = "general.ledger"
-	TransactionFormat = "%s\t%s\t%s"
-	AccountFormat     = "\t%s\t%s"
-	PendingFile       = filepath.Join(os.TempDir(), "pending.ledger")
+	LedgerFile  = "general.ledger"
+	PendingFile = filepath.Join(os.TempDir(), "pending.ledger")
 )
 
 // Initialize the application
 func init() {
+	if _, err := os.Stat(LedgerFile); os.IsNotExist(err) {
+		_, err = os.Create(LedgerFile)
+		check(err)
+		log.Println("Created ledger file at", LedgerFile)
+	}
+
 	if _, err := os.Stat(PendingFile); os.IsNotExist(err) {
 		_, err = os.Create(PendingFile)
 		check(err)

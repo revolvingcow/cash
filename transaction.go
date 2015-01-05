@@ -20,6 +20,10 @@ func (t *Transaction) FromString(text string) {
 	// Parse the lines of text
 	lines := strings.Split(text, "\n")
 	for i, line := range lines {
+		if len(line) == 0 {
+			continue
+		}
+
 		switch i {
 		case 0:
 			fields := strings.Split(line, "\t")
@@ -34,20 +38,17 @@ func (t *Transaction) FromString(text string) {
 				description = strings.Join(fields[2:], " ")
 			}
 
-			t = &Transaction{
-				Date:        date,
-				Project:     project,
-				Description: description,
-				Accounts:    []Account{},
-			}
+			t.Date = date
+			t.Project = project
+			t.Description = description
+			t.Accounts = []Account{}
 			break
 
 		default:
-			var account Account
-			err := account.FromString(line)
+			var a Account
+			err := a.FromString(line)
 			check(err)
-
-			t.Accounts = append(t.Accounts, account)
+			t.Accounts = append(t.Accounts, a)
 			break
 		}
 	}
@@ -84,5 +85,10 @@ func (t *Transaction) ToString() string {
 		accounts += account.ToString()
 	}
 
-	return fmt.Sprintf("%s\t%s\t%s\n%s\n", t.Date.Format("2006-01-02"), t.Project, t.Description, string(accounts))
+	err := t.CheckBalance()
+	if err != nil {
+		accounts += fmt.Sprintf("Error: %s\n", err)
+	}
+
+	return fmt.Sprintf("%s\t%s\t%s\n%s\n", t.Date.Format("2006-01-02"), t.Project, t.Description, accounts)
 }

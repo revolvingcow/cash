@@ -4,12 +4,14 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/codegangsta/cli"
 )
 
+// Command line subcommand for "commit"
 var commandCommit = cli.Command{
 	Name:      "commit",
 	ShortName: "c",
@@ -21,11 +23,22 @@ var commandCommit = cli.Command{
 			Value: time.Now().UTC().Format("2006-01-02"),
 			Usage: "",
 		},
+		cli.StringFlag{
+			Name:  "file",
+			Value: "general.ledger",
+			Usage: "",
+		},
 	},
 }
 
 // Commit the pending transaction
 func actionCommit(c *cli.Context) {
+	ledgerFile := c.String("file")
+	ensureFileExists(ledgerFile)
+
+	pendingFile := filepath.Join(os.TempDir(), c.String("file"))
+	ensureFileExists(pendingFile)
+
 	date, err := parseDate(c.String("date"))
 	check(err)
 
@@ -33,34 +46,8 @@ func actionCommit(c *cli.Context) {
 	project := parseProject(args)
 	description := parseDescription(args, project)
 
-	writeTransaction(date, project, description)
-}
-
-// Parse the given string to extract a proper date
-func parseDate(in string) (time.Time, error) {
-	formats := []string{
-		"2006-01-02",
-		"2006/01/02",
-		"2006-1-2",
-		"2006/1/2",
-		"01-02-2006",
-		"01/02/2006",
-		"1-2-2006",
-		"1/2/2006",
-		"Jan 2, 2006",
-		"Jan 02, 2006",
-		"2 Jan 2006",
-		"02 Jan 2006",
-	}
-
-	for _, f := range formats {
-		d, err := time.Parse(f, in)
-		if err == nil {
-			return d, nil
-		}
-	}
-
-	return time.Now().UTC(), errors.New("No valid date provided")
+	writeTransaction(ledgerFile, pendingFile, project, description, date)
+	actionClear(c)
 }
 
 // Parse a given string to extract a project name
@@ -90,12 +77,12 @@ func parseDescription(fields []string, project string) string {
 }
 
 // Write a transaction line where there is a pending transaction
-func writeTransaction(date time.Time, project, description string) {
-	if !hasPendingTransaction() {
+func writeTransaction(ledgerFile, pendingFile, project, description string, date time.Time) {
+	if !hasPendingTransaction(pendingFile) {
 		check(errors.New("No pending transaction to write"))
 	}
 
-	pending, err := ioutil.ReadFile(PendingFile)
+	pending, err := ioutil.ReadFile(pendingFile)
 	check(err)
 
 	t := Transaction{
@@ -117,7 +104,7 @@ func writeTransaction(date time.Time, project, description string) {
 	err = t.CheckBalance()
 	check(err)
 
-	file, err := os.OpenFile(LedgerFile, os.O_APPEND|os.O_WRONLY, 0666)
+	file, err := os.OpenFile(ledgerFile, os.O_APPEND|os.O_WRONLY, 0666)
 	check(err)
 	defer file.Close()
 	_, err = file.WriteString(t.ToString())

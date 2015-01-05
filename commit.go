@@ -133,14 +133,14 @@ func (t *Transaction) FromString(text string) error {
 				break
 			}
 
-			account := fields[0]
+			account := fields[1]
 			debit := true
 
-			if strings.HasPrefix(fields[1], "-") {
+			if strings.HasPrefix(fields[2], "-") {
 				debit = false
 			}
 			value := new(big.Rat)
-			value.SetString(fields[1][1:])
+			value.SetString(fields[2][1:])
 
 			t.Accounts = append(
 				t.Accounts,
@@ -154,10 +154,18 @@ func (t *Transaction) FromString(text string) error {
 		}
 	}
 
+	if len(t.Accounts) == 0 {
+		return errors.New("Transaction does not have any accounts")
+	}
+
 	// Check that they balance
 	balance := new(big.Rat)
 	for _, a := range t.Accounts {
-		balance.Add(balance, a.Amount)
+		if a.Debit {
+			balance.Add(balance, a.Amount)
+		} else {
+			balance.Sub(balance, a.Amount)
+		}
 	}
 	if balance.FloatString(2) != "0.00" {
 		return errors.New("Transaction does not balance")

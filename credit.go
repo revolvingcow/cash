@@ -28,6 +28,6 @@ func actionCredit(c *cli.Context) {
 	check(err)
 	defer f.Close()
 
-	_, err = f.WriteString(fmt.Sprintf("\t%s\t+%s\n", account, value.FloatString(2)))
+	_, err = f.WriteString(fmt.Sprintf("\t%s\t-%s\n", account, value.FloatString(2)))
 	check(err)
 }

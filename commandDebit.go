@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/codegangsta/cli"
 )
@@ -24,7 +24,7 @@ var commandDebit = cli.Command{
 
 // Add a debit to the pending transaction
 func actionDebit(c *cli.Context) {
-	pendingFile := filepath.Join(os.TempDir(), c.String("file"))
+	pendingFile := fmt.Sprintf(".%s", c.String("file"))
 	ensureFileExists(pendingFile)
 
 	args := c.Args()

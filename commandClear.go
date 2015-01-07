@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/codegangsta/cli"
 )
@@ -24,7 +24,7 @@ var commandClear = cli.Command{
 
 // Clear current pending transaction
 func actionClear(c *cli.Context) {
-	pendingFile := filepath.Join(os.TempDir(), c.String("file"))
+	pendingFile := fmt.Sprintf(".%s", c.String("file"))
 	ensureFileExists(pendingFile)
 
 	file, err := os.OpenFile(pendingFile, os.O_TRUNC|os.O_WRONLY, 0666)

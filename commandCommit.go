@@ -2,9 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -36,7 +36,7 @@ func actionCommit(c *cli.Context) {
 	ledgerFile := c.String("file")
 	ensureFileExists(ledgerFile)
 
-	pendingFile := filepath.Join(os.TempDir(), c.String("file"))
+	pendingFile := fmt.Sprintf(".%s", c.String("file"))
 	ensureFileExists(pendingFile)
 
 	date, err := parseDate(c.String("date"))

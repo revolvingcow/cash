@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
-	"path/filepath"
 
 	"github.com/codegangsta/cli"
 )
@@ -26,7 +24,7 @@ var commandStatus = cli.Command{
 
 // Display the current status of the ledger
 func actionStatus(c *cli.Context) {
-	pendingFile := filepath.Join(os.TempDir(), c.String("file"))
+	pendingFile := fmt.Sprintf(".%s", c.String("file"))
 	ensureFileExists(pendingFile)
 
 	if hasPendingTransaction(pendingFile) {

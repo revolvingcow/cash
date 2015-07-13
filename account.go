@@ -15,21 +15,27 @@ type Account struct {
 
 // Convert from a string to an account
 func (a *Account) FromString(text string) error {
-	fields := strings.Split(text, "\t")
+	parts := strings.Split(text, "\t")
+	fields := []string{}
+	for _, p := range parts {
+		if p != "" {
+			fields = append(fields, p)
+		}
+	}
 
-	if len(fields) != 3 {
+	if len(fields) != 2 {
 		return errors.New("Invalid account format")
 	}
 
 	debit := true
-	if strings.HasPrefix(fields[2], "-") {
+	if strings.HasPrefix(fields[1], "-") {
 		debit = false
 	}
 
 	a.Debit = debit
-	a.Name = fields[1]
+	a.Name = fields[0]
 	a.Amount = new(big.Rat)
-	a.Amount.SetString(fields[2][1:])
+	a.Amount.SetString(fields[1][1:])
 
 	return nil
 }

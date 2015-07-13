@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/codegangsta/cli"
 )
@@ -53,9 +54,11 @@ func actionList(c *cli.Context) {
 	for scanner.Scan() {
 		text := scanner.Text()
 
-		t := Transaction{}
-		t.FromString(text)
-		l.Transactions = append(l.Transactions, t)
+		if strings.Index(text, "#") != 0 {
+			t := Transaction{}
+			t.FromString(text)
+			l.Transactions = append(l.Transactions, t)
+		}
 	}
 
 	fmt.Print(l.ToString())

@@ -70,8 +70,9 @@ func (t *Transaction) CheckBalance() error {
 		}
 	}
 
-	if balance.FloatString(2) != "0.00" {
-		return errors.New("Transaction does not balance")
+	b := balance.FloatString(2)
+	if b != "0.00" {
+		return errors.New(fmt.Sprintf("Transaction does not balance: %s", b))
 	}
 
 	return nil

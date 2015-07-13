@@ -17,7 +17,7 @@ var commandStatus = cli.Command{
 		cli.StringFlag{
 			Name:  "file",
 			Value: "general.ledger",
-			Usage: "",
+			Usage: "The ledger file",
 		},
 	},
 }

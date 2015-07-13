@@ -17,7 +17,7 @@ var commandClear = cli.Command{
 		cli.StringFlag{
 			Name:  "file",
 			Value: "general.ledger",
-			Usage: "",
+			Usage: "Clears ledger (this cannot be reversed!)",
 		},
 	},
 }

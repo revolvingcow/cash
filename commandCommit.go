@@ -21,12 +21,12 @@ var commandCommit = cli.Command{
 		cli.StringFlag{
 			Name:  "date",
 			Value: time.Now().UTC().Format("2006-01-02"),
-			Usage: "",
+			Usage: "The transaction date",
 		},
 		cli.StringFlag{
 			Name:  "file",
 			Value: "general.ledger",
-			Usage: "",
+			Usage: "The ledger file to store the transaction",
 		},
 	},
 }

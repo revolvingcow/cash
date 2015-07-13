@@ -17,7 +17,7 @@ var commandDebit = cli.Command{
 		cli.StringFlag{
 			Name:  "file",
 			Value: "general.ledger",
-			Usage: "",
+			Usage: "The ledger to store the debit",
 		},
 	},
 }

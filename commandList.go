@@ -19,21 +19,21 @@ var commandList = cli.Command{
 		cli.StringFlag{
 			Name:  "file",
 			Value: "general.ledger",
-			Usage: "",
+			Usage: "The ledger file",
 		},
 		cli.StringFlag{
 			Name:  "project",
 			Value: "",
-			Usage: "",
+			Usage: "The project name",
 		},
 		cli.StringFlag{
 			Name:  "sort",
 			Value: "account",
-			Usage: "",
+			Usage: "The sort field",
 		},
 		cli.BoolFlag{
 			Name:  "asc",
-			Usage: "",
+			Usage: "The sort direction",
 		},
 	},
 }

@@ -44,9 +44,34 @@ func (l *Ledger) ToString() string {
 	}
 	sort.Strings(keys)
 
+	padLength := 20
+	for _, key := range keys {
+		if len(key) > padLength {
+			padLength = len(key) + 2
+		}
+	}
+
 	boom := ""
 	for _, key := range keys {
-		boom += fmt.Sprintf("%s\t\t%s\n", key, balance[key].FloatString(2))
+		extra := ""
+		if balance[key].Sign() == 1 {
+			extra = "+"
+		}
+		boom += fmt.Sprintf("%s%s%s\n", padRight(key, " ", padLength), extra, balance[key].FloatString(2))
 	}
 	return boom
+}
+
+func padRight(source, c string, length int) string {
+	for i := len(source); i < length; i++ {
+		source += c
+	}
+	return source
+}
+
+func padLeft(source, c string, length int) string {
+	for i := len(source); i < length; i++ {
+		source = c + source
+	}
+	return source
 }

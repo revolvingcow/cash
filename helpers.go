@@ -24,6 +24,18 @@ func ensureFileExists(fileName string) {
 	}
 }
 
+// Parse some text separating the fields by tab(s).
+func parseTabs(text string) []string {
+	parts := strings.Split(text, "\t")
+	fields := []string{}
+	for _, p := range parts {
+		if p != "" {
+			fields = append(fields, p)
+		}
+	}
+	return fields
+}
+
 // Format the ledger so it is human readable
 func formatLedger() {
 }

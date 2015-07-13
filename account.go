@@ -15,14 +15,7 @@ type Account struct {
 
 // Convert from a string to an account
 func (a *Account) FromString(text string) error {
-	parts := strings.Split(text, "\t")
-	fields := []string{}
-	for _, p := range parts {
-		if p != "" {
-			fields = append(fields, p)
-		}
-	}
-
+	fields := parseTabs(text)
 	if len(fields) != 2 {
 		return errors.New("Invalid account format")
 	}

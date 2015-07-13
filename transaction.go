@@ -26,7 +26,7 @@ func (t *Transaction) FromString(text string) {
 
 		switch i {
 		case 0:
-			fields := strings.Split(line, "\t")
+			fields := parseTabs(text)
 
 			date, err := parseDate(fields[0])
 			check(err)
